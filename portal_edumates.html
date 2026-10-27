@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal EduMates - Recursos y Videojuegos Matemáticos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            purple: '#7C3AED',
+                            pink: '#EC4899',
+                            blue: '#3B82F6',
+                            yellow: '#F59E0B',
+                            green: '#10B981',
+                            teal: '#14B8A6'
+                        }
+                    },
+                    animation: {
+                        'bounce-gentle': 'bounceGentle 3s infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-12px) rotate(2deg)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F3F4F6;
+            background-image: radial-gradient(#CBD5E1 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
+        }
+
+        .title-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94A3B8;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748B;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <!-- Top Decorative Header Bar -->
+    <header class="bg-white border-b-4 border-indigo-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetFilters()">
+                <div class="w-12 h-12 bg-gradient-to-tr from-purple-600 to-pink-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-200 transform hover:rotate-6 transition-transform">
+                    <i class="fa-solid fa-calculator text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="title-font text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent leading-none">
+                        EduMates
+                    </h1>
+                    <p class="text-xs text-slate-500 font-semibold tracking-wide">PORTAL DE MATEMÁTICAS INTERACTIVAS</p>
+                </div>
+            </div>
+
+            <!-- Global Action Controls -->
+            <div class="flex items-center gap-3">
+                <button onclick="scrollToWidget('quick-quiz-section')" class="title-font bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-bold py-2 px-4 rounded-xl shadow-md hover:shadow-lg transition flex items-center gap-2 text-sm sm:text-base">
+                    <i class="fa-solid fa-bolt text-yellow-200 animate-bounce-gentle"></i>
+                    <span>¡Reto Exprés!</span>
+                </button>
+
+                <button onclick="toggleFavoritesFilter()" id="fav-filter-btn" class="title-font bg-slate-100 hover:bg-pink-50 text-slate-700 hover:text-pink-600 font-bold py-2 px-4 rounded-xl border border-slate-200 transition flex items-center gap-2 text-sm sm:text-base">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <span>Favoritos (<span id="fav-count">0</span>)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+
+        <!-- Hero Banner -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 p-6 sm:p-10 text-white shadow-xl mb-10">
+            <div class="absolute -right-10 -bottom-10 opacity-20 text-9xl pointer-events-none font-bold">
+                <i class="fa-solid fa-square-root-variable"></i>
+            </div>
+            <div class="relative z-10 max-w-2xl">
+                <span class="inline-block bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+                    🚀 ¡Aprende jugando!
+                </span>
+                <h2 class="title-font text-3xl sm:text-5xl font-extrabold tracking-tight mb-3">
+                    Explora, Practica y Domina las Matemáticas
+                </h2>
+                <p class="text-indigo-100 text-base sm:text-lg mb-6 leading-relaxed">
+                    Accede a las mejores plataformas web inclusivas y diviértete con videojuegos de cálculo mental, multiplicaciones y desafíos divertidos.
+                </p>
+
+                <!-- Search & Filters -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input type="text" id="search-input" onkeyup="filterResources()" placeholder="Buscar recursos, juegos, tablas, sumar..." 
+                            class="w-full pl-11 pr-4 py-3 bg-white text-slate-800 rounded-2xl shadow-inner focus:outline-none focus:ring-4 focus:ring-purple-300 font-semibold placeholder-slate-400">
+                    </div>
+                    
+                    <select id="category-filter" onchange="filterResources()" class="bg-white text-slate-700 font-bold px-4 py-3 rounded-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300 cursor-pointer">
+                        <option value="all">🔍 Todas las categorías</option>
+                        <option value="web">🌐 Webs Didácticas</option>
+                        <option value="game">🎮 Videojuegos</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Webs de Matemáticas -->
+        <section id="webs-section" class="mb-12">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl shadow-sm">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+                <div>
+                    <h3 class="title-font text-2xl sm:text-3xl font-bold text-slate-800">Webs de Matemáticas</h3>
+                    <p class="text-slate-500 text-sm">Plataformas educativas completas, material manipulativo e inclusivo</p>
+                </div>
+            </div>
+            <div id="webs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- Section 2: Videojuegos Educativos -->
+        <section id="games-section" class="mb-12">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xl shadow-sm">
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <div>
+                    <h3 class="title-font text-2xl sm:text-3xl font-bold text-slate-800">Videojuegos Educativos de Mates</h3>
+                    <p class="text-slate-500 text-sm">Minijuegos arcade interactivos de agilidad mental por El Maestro Manu</p>
+                </div>
+            </div>
+            <div id="games-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- No Results Fallback -->
+        <div id="no-results" class="hidden text-center py-12 bg-white rounded-3xl border-2 border-dashed border-slate-300">
+            <i class="fa-solid fa-face-frown text-5xl text-slate-400 mb-3"></i>
+            <h4 class="title-font text-xl font-bold text-slate-700">No hemos encontrado ningún recurso</h4>
+            <p class="text-slate-500 text-sm mb-4">Prueba a buscar con otras palabras clave o limpia los filtros.</p>
+            <button onclick="resetFilters()" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-xl hover:bg-indigo-700 transition">
+                Restablecer Búsqueda
+            </button>
+        </div>
+
+        <!-- Section 3: Built-in Interactive Math Quiz Widget -->
+        <section id="quick-quiz-section" class="bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 rounded-3xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden my-12">
+            <div class="absolute -right-6 -bottom-6 opacity-10 text-9xl font-black pointer-events-none">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            
+            <div class="max-w-3xl mx-auto text-center relative z-10">
+                <span class="inline-block bg-white/20 backdrop-blur-md text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+                    ⚡ JUEGO INTEGRADO EN EL PORTAL
+                </span>
+                <h3 class="title-font text-3xl sm:text-4xl font-extrabold mb-2">Desafío Mental Rápido</h3>
+                <p class="text-amber-100 text-sm sm:text-base mb-6">¡Pon a prueba tus reflejos matemáticos directos aquí mismo sin salir!</p>
+
+                <!-- Quiz Main Box -->
+                <div class="bg-white rounded-2xl p-6 text-slate-800 shadow-xl border-4 border-amber-300">
+                    
+                    <!-- Stats Bar -->
+                    <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Puntos:</span>
+                            <span id="quiz-score" class="title-font text-2xl font-black text-amber-500">0</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Racha:</span>
+                            <span id="quiz-streak" class="title-font text-2xl font-black text-orange-500">🔥 0</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Tiempo:</span>
+                            <span id="quiz-timer" class="title-font text-2xl font-black text-emerald-600">30s</span>
+                        </div>
+                    </div>
+
+                    <!-- Question Container -->
+                    <div id="quiz-start-screen" class="py-6">
+                        <i class="fa-solid fa-brain text-5xl text-amber-500 mb-4 animate-bounce-gentle"></i>
+                        <h4 class="title-font text-2xl font-bold mb-2 text-slate-800">¿Listo para calcular a toda velocidad?</h4>
+                        <p class="text-slate-500 text-sm mb-6">Responde tantas operaciones como puedas antes de que acabe el tiempo.</p>
+                        
+                        <!-- Difficulty Select -->
+                        <div class="flex justify-center gap-3 mb-6">
+                            <button onclick="setDifficulty('easy')" id="diff-easy" class="diff-btn px-4 py-2 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm">Fácil (+ -)</button>
+                            <button onclick="setDifficulty('medium')" id="diff-medium" class="diff-btn px-4 py-2 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-sm">Medio (×)</button>
+                            <button onclick="setDifficulty('hard')" id="diff-hard" class="diff-btn px-4 py-2 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-sm">Pro (÷ × + -)</button>
+                        </div>
+
+                        <button onclick="startQuiz()" class="title-font bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-3 px-8 rounded-2xl text-lg shadow-lg transform active:scale-95 transition">
+                            🚀 ¡EMPEZAR JUEGO!
+                        </button>
+                    </div>
+
+                    <!-- Active Question Screen -->
+                    <div id="quiz-play-screen" class="hidden py-4">
+                        <div class="mb-6">
+                            <span id="quiz-problem" class="title-font text-4xl sm:text-6xl font-black text-indigo-900 tracking-wider">
+                                8 × 7 = ?
+                            </span>
+                        </div>
+
+                        <!-- Options Grid -->
+                        <div id="quiz-options" class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Game Over Screen -->
+                    <div id="quiz-end-screen" class="hidden py-6">
+                        <div class="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-3">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <h4 class="title-font text-2xl font-bold text-slate-800 mb-1">¡Tiempo Agotado!</h4>
+                        <p class="text-slate-500 text-sm mb-4">Has conseguido una puntuación de:</p>
+                        <div class="title-font text-5xl font-black text-amber-500 mb-6" id="final-score">0</div>
+                        
+                        <div class="flex justify-center gap-3">
+                            <button onclick="startQuiz()" class="title-font bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl transition">
+                                <i class="fa-solid fa-rotate-right mr-2"></i>Jugar de Nuevo
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm font-medium">
+            <p class="mb-2">✨ Recopilatorio de recursos y videojuegos matemáticos adaptados para el aula y el hogar.</p>
+            <p class="text-xs text-slate-400">Diseñado con ❤️ para estudiantes y docentes.</p>
+        </div>
+    </footer>
+
+    <!-- Iframe Preview Modal -->
+    <div id="iframe-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-6">
+        <div class="bg-white w-full max-w-6xl h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-indigo-400">
+            <!-- Modal Header -->
+            <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span id="modal-icon" class="text-2xl text-indigo-600">🌐</span>
+                    <div>
+                        <h3 id="modal-title" class="title-font text-xl font-bold text-slate-800">Vista Previa</h3>
+                        <p id="modal-url" class="text-xs text-slate-400 truncate max-w-md"></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a id="modal-external-btn" href="#" target="_blank" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition">
+                        <span>Abrir pestaña completa</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                    <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-slate-200 hover:bg-red-500 hover:text-white text-slate-600 flex items-center justify-center font-bold transition text-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Modal Body (Iframe) -->
+            <div class="flex-1 bg-slate-900 relative">
+                <div id="iframe-loader" class="absolute inset-0 flex flex-col items-center justify-center text-white bg-slate-800">
+                    <i class="fa-solid fa-circle-notch animate-spin text-4xl mb-3 text-indigo-400"></i>
+                    <p class="text-sm font-semibold">Cargando juego / web interactiva...</p>
+                </div>
+                <iframe id="preview-iframe" class="w-full h-full border-0 relative z-10" onload="document.getElementById('iframe-loader').classList.add('hidden')"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // Data Structure
+        const resourcesData = [
+            // WEBS DE MATEMÁTICAS
+            {
+                id: 'web-1',
+                category: 'web',
+                title: 'Matemáticas Inclusivas',
+                description: 'Recurso inclusivo adaptado para todos los niveles y capacidades. Ideal para atención a la diversidad.',
+                url: 'https://www.matematicasinclusivas.com/',
+                badge: 'Inclusivo & Adaptado',
+                badgeColor: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                icon: 'fa-hands-holding-child',
+                colorFrom: 'from-emerald-400',
+                colorTo: 'to-teal-600',
+                tags: ['inclusivo', 'todos los niveles', 'diversidad', 'fichas', 'apoyo']
+            },
+            {
+                id: 'web-2',
+                category: 'web',
+                title: 'Tablas de Multiplicar',
+                description: 'Practica y memoriza las tablas de multiplicar del 1 al 12 de forma interactiva con test y juegos.',
+                url: 'https://www.tablasdemultiplicar.com/',
+                badge: 'Multiplicaciones',
+                badgeColor: 'bg-blue-100 text-blue-700 border-blue-200',
+                icon: 'fa-xmark',
+                colorFrom: 'from-blue-400',
+                colorTo: 'to-indigo-600',
+                tags: ['tablas', 'multiplicar', 'test', 'primaria', 'memorizar']
+            },
+            {
+                id: 'web-3',
+                category: 'web',
+                title: 'Toy Theater',
+                description: 'Herramientas manipulativas interactivas, juegos educativos visuales, regletas y ábacos virtuales.',
+                url: 'https://toytheater.com',
+                badge: 'Manipulativos Virtuales',
+                badgeColor: 'bg-amber-100 text-amber-700 border-amber-200',
+                icon: 'fa-shapes',
+                colorFrom: 'from-amber-400',
+                colorTo: 'to-orange-500',
+                tags: ['toy theater', 'manipulativos', 'geometría', 'ábalos', 'reloj']
+            },
+
+            // VIDEOJUEGOS DE MATES
+            {
+                id: 'game-1',
+                category: 'game',
+                title: 'Math Invaders',
+                description: 'Defiende la Tierra destruyendo naves espaciales resolviendo operaciones de suma, resta, multiplicación y división.',
+                url: 'https://elmaestromanu.com/videojuegos/invaders/',
+                badge: 'Arcade - Operaciones',
+                badgeColor: 'bg-purple-100 text-purple-700 border-purple-200',
+                icon: 'fa-space-shuttle',
+                colorFrom: 'from-purple-500',
+                colorTo: 'to-indigo-700',
+                tags: ['invaders', 'sumas', 'restas', 'multiplicacion', 'division', 'el maestro manu', 'arcade']
+            },
+            {
+                id: 'game-2',
+                category: 'game',
+                title: 'Dardos Matemáticos',
+                description: '¡Apunta a la diana correcta! Calcula rápidamente para afinar tu puntería y conseguir la máxima puntuación.',
+                url: 'https://elmaestromanu.com/videojuegos/dardos/',
+                badge: 'Puntería & Cálculo',
+                badgeColor: 'bg-red-100 text-red-700 border-red-200',
+                icon: 'fa-bullseye',
+                colorFrom: 'from-red-400',
+                colorTo: 'to-pink-600',
+                tags: ['dardos', 'diana', 'calculo mental', 'punteria', 'el maestro manu']
+            },
+            {
+                id: 'game-3',
+                category: 'game',
+                title: 'Repaso Mundial de Mates',
+                description: 'Un campeonato global de cálculo para repasar todo el temario de matemáticas mientras juegas la copa.',
+                url: 'https://elmaestromanu.com/videojuegos/mundial/juego',
+                badge: 'Campeonato Global',
+                badgeColor: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                icon: 'fa-trophy',
+                colorFrom: 'from-yellow-400',
+                colorTo: 'to-amber-600',
+                tags: ['mundial', 'copa', 'repaso general', 'campeonato', 'el maestro manu']
+            }
+        ];
+
+        // State Management
+        let favorites = JSON.parse(localStorage.getItem('edumates_favs') || '[]');
+        let onlyFavoritesFilter = false;
+
+        // Sound FX Utility (Web Audio API)
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc.frequency.setValueAtTime(150, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                }
+            } catch (e) {
+                // Audio not supported or blocked
+            }
+        }
+
+        // Render Cards
+        function renderCards() {
+            const websGrid = document.getElementById('webs-grid');
+            const gamesGrid = document.getElementById('games-grid');
+            
+            websGrid.innerHTML = '';
+            gamesGrid.innerHTML = '';
+
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            const categoryTerm = document.getElementById('category-filter').value;
+
+            let visibleWebs = 0;
+            let visibleGames = 0;
+
+            resourcesData.forEach(item => {
+                // Check Favorites Filter
+                if (onlyFavoritesFilter && !favorites.includes(item.id)) return;
+
+                // Check Category Filter
+                if (categoryTerm !== 'all' && item.category !== categoryTerm) return;
+
+                // Check Search Input
+                const matchesSearch = item.title.toLowerCase().includes(searchTerm) ||
+                                      item.description.toLowerCase().includes(searchTerm) ||
+                                      item.tags.some(t => t.toLowerCase().includes(searchTerm));
+
+                if (!matchesSearch) return;
+
+                const isFav = favorites.includes(item.id);
+                const cardHTML = createCardComponent(item, isFav);
+
+                if (item.category === 'web') {
+                    websGrid.innerHTML += cardHTML;
+                    visibleWebs++;
+                } else {
+                    gamesGrid.innerHTML += cardHTML;
+                    visibleGames++;
+                }
+            });
+
+            // Toggle Section Visibility
+            document.getElementById('webs-section').style.display = (visibleWebs > 0) ? 'block' : 'none';
+            document.getElementById('games-section').style.display = (visibleGames > 0) ? 'block' : 'none';
+
+            // Show No Results if empty
+            const noResults = document.getElementById('no-results');
+            if (visibleWebs === 0 && visibleGames === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            document.getElementById('fav-count').innerText = favorites.length;
+        }
+
+        // Create Card HTML Component
+        function createCardComponent(item, isFav) {
+            return `
+                <div class="card-hover bg-white rounded-3xl p-6 shadow-md border border-slate-100 flex flex-col justify-between relative overflow-hidden group">
+                    <!-- Top Gradient Decoration Bar -->
+                    <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r ${item.colorFrom} ${item.colorTo}"></div>
+
+                    <div>
+                        <!-- Header & Favorite Icon -->
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${item.colorFrom} ${item.colorTo} text-white flex items-center justify-center text-xl shadow-md">
+                                <i class="fa-solid ${item.icon}"></i>
+                            </div>
+                            
+                            <button onclick="toggleFav('${item.id}', event)" class="w-10 h-10 rounded-full bg-slate-50 hover:bg-pink-50 text-slate-300 hover:text-pink-500 transition flex items-center justify-center text-lg">
+                                <i class="fa-${isFav ? 'solid' : 'regular'} fa-star ${isFav ? 'text-amber-400' : ''}"></i>
+                            </button>
+                        </div>
+
+                        <!-- Badge -->
+                        <span class="inline-block px-3 py-1 text-xs font-bold rounded-full border mb-2 ${item.badgeColor}">
+                            ${item.badge}
+                        </span>
+
+                        <!-- Title -->
+                        <h4 class="title-font text-xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition">
+                            ${item.title}
+                        </h4>
+
+                        <!-- Description -->
+                        <p class="text-slate-500 text-sm mb-6 leading-relaxed">
+                            ${item.description}
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2 pt-4 border-t border-slate-100 mt-auto">
+                        <button onclick="openModal('${item.url}', '${item.title}', '${item.icon}')" class="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-window-maximize"></i>
+                            <span>Vista Previa</span>
+                        </button>
+                        
+                        <a href="${item.url}" target="_blank" rel="noopener" class="bg-gradient-to-r ${item.colorFrom} ${item.colorTo} hover:opacity-90 text-white font-bold p-2.5 rounded-xl text-sm transition flex items-center justify-center" title="Abrir en pestaña nueva">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Bookmark Toggle Logic
+        function toggleFav(id, event) {
+            event.stopPropagation();
+            if (favorites.includes(id)) {
+                favorites = favorites.filter(favId => favId !== id);
+            } else {
+                favorites.push(id);
+            }
+            localStorage.setItem('edumates_favs', JSON.stringify(favorites));
+            renderCards();
+        }
+
+        function toggleFavoritesFilter() {
+            onlyFavoritesFilter = !onlyFavoritesFilter;
+            const btn = document.getElementById('fav-filter-btn');
+            if (onlyFavoritesFilter) {
+                btn.classList.remove('bg-slate-100', 'text-slate-700');
+                btn.classList.add('bg-pink-500', 'text-white');
+            } else {
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+                btn.classList.remove('bg-pink-500', 'text-white');
+            }
+            renderCards();
+        }
+
+        function filterResources() {
+            renderCards();
+        }
+
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('category-filter').value = 'all';
+            onlyFavoritesFilter = false;
+            const btn = document.getElementById('fav-filter-btn');
+            btn.classList.add('bg-slate-100', 'text-slate-700');
+            btn.classList.remove('bg-pink-500', 'text-white');
+            renderCards();
+        }
+
+        // Iframe Modal Logic
+        function openModal(url, title, iconClass) {
+            const modal = document.getElementById('iframe-modal');
+            const iframe = document.getElementById('preview-iframe');
+            const modalTitle = document.getElementById('modal-title');
+            const modalUrl = document.getElementById('modal-url');
+            const externalBtn = document.getElementById('modal-external-btn');
+            const loader = document.getElementById('iframe-loader');
+
+            loader.classList.remove('hidden');
+            modalTitle.innerText = title;
+            modalUrl.innerText = url;
+            externalBtn.href = url;
+            
+            iframe.src = url;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('iframe-modal');
+            const iframe = document.getElementById('preview-iframe');
+            iframe.src = '';
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function scrollToWidget(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // MINI MATH QUIZ GAME LOGIC
+        // ==========================================
+        let quizScore = 0;
+        let quizStreak = 0;
+        let quizTimeLeft = 30;
+        let quizTimerId = null;
+        let currentDifficulty = 'easy'; // easy, medium, hard
+        let currentAnswer = null;
+
+        function setDifficulty(diff) {
+            currentDifficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(b => {
+                b.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                b.classList.add('border-slate-200', 'text-slate-600');
+            });
+            const selectedBtn = document.getElementById(`diff-${diff}`);
+            selectedBtn.classList.remove('border-slate-200', 'text-slate-600');
+            selectedBtn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+        }
+
+        function startQuiz() {
+            quizScore = 0;
+            quizStreak = 0;
+            quizTimeLeft = 30;
+
+            document.getElementById('quiz-score').innerText = quizScore;
+            document.getElementById('quiz-streak').innerText = `🔥 ${quizStreak}`;
+            document.getElementById('quiz-timer').innerText = `${quizTimeLeft}s`;
+
+            document.getElementById('quiz-start-screen').classList.add('hidden');
+            document.getElementById('quiz-end-screen').classList.add('hidden');
+            document.getElementById('quiz-play-screen').classList.remove('hidden');
+
+            generateQuestion();
+
+            clearInterval(quizTimerId);
+            quizTimerId = setInterval(() => {
+                quizTimeLeft--;
+                document.getElementById('quiz-timer').innerText = `${quizTimeLeft}s`;
+
+                if (quizTimeLeft <= 0) {
+                    endQuiz();
+                }
+            }, 1000);
+        }
+
+        function generateQuestion() {
+            let n1, n2, operator, answer;
+
+            if (currentDifficulty === 'easy') {
+                const ops = ['+', '-'];
+                operator = ops[Math.floor(Math.random() * ops.length)];
+                n1 = Math.floor(Math.random() * 20) + 1;
+                n2 = Math.floor(Math.random() * 20) + 1;
+                if (operator === '-' && n1 < n2) [n1, n2] = [n2, n1]; // Avoid negative results
+                answer = operator === '+' ? n1 + n2 : n1 - n2;
+
+            } else if (currentDifficulty === 'medium') {
+                operator = '×';
+                n1 = Math.floor(Math.random() * 10) + 2;
+                n2 = Math.floor(Math.random() * 10) + 1;
+                answer = n1 * n2;
+
+            } else { // Hard
+                const ops = ['+', '-', '×', '÷'];
+                operator = ops[Math.floor(Math.random() * ops.length)];
+
+                if (operator === '+') {
+                    n1 = Math.floor(Math.random() * 50) + 10;
+                    n2 = Math.floor(Math.random() * 50) + 10;
+                    answer = n1 + n2;
+                } else if (operator === '-') {
+                    n1 = Math.floor(Math.random() * 80) + 20;
+                    n2 = Math.floor(Math.random() * n1) + 5;
+                    answer = n1 - n2;
+                } else if (operator === '×') {
+                    n1 = Math.floor(Math.random() * 12) + 2;
+                    n2 = Math.floor(Math.random() * 12) + 2;
+                    answer = n1 * n2;
+                } else { // Division
+                    n2 = Math.floor(Math.random() * 9) + 2;
+                    answer = Math.floor(Math.random() * 10) + 1;
+                    n1 = n2 * answer;
+                }
+            }
+
+            currentAnswer = answer;
+            document.getElementById('quiz-problem').innerText = `${n1} ${operator} ${n2} = ?`;
+
+            // Generate Options
+            const options = [answer];
+            while (options.length < 4) {
+                let delta = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
+                let wrongOpt = answer + delta;
+                if (wrongOpt >= 0 && !options.includes(wrongOpt)) {
+                    options.push(wrongOpt);
+                }
+            }
+
+            // Shuffle Options
+            options.sort(() => Math.random() - 0.5);
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            options.forEach(opt => {
+                optionsContainer.innerHTML += `
+                    <button onclick="checkAnswer(${opt}, this)" class="title-font bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-800 text-2xl font-bold py-4 rounded-2xl shadow-sm border border-slate-200 transition active:scale-95">
+                        ${opt}
+                    </button>
+                `;
+            });
+        }
+
+        function checkAnswer(selectedOpt, btn) {
+            if (selectedOpt === currentAnswer) {
+                playSound('correct');
+                quizScore += 10 + (quizStreak * 2);
+                quizStreak++;
+                btn.classList.add('bg-emerald-500', 'text-white');
+
+                // Confetti boost on streak multiples of 5
+                if (quizStreak % 5 === 0 && window.confetti) {
+                    confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
+                }
+            } else {
+                playSound('wrong');
+                quizStreak = 0;
+                btn.classList.add('bg-red-500', 'text-white');
+            }
+
+            document.getElementById('quiz-score').innerText = quizScore;
+            document.getElementById('quiz-streak').innerText = `🔥 ${quizStreak}`;
+
+            setTimeout(() => {
+                generateQuestion();
+            }, 250);
+        }
+
+        function endQuiz() {
+            clearInterval(quizTimerId);
+            document.getElementById('quiz-play-screen').classList.add('hidden');
+            document.getElementById('quiz-end-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = quizScore;
+
+            if (quizScore > 50 && window.confetti) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+        }
+
+        // Initialize App on DOM Load
+        window.onload = function() {
+            renderCards();
+        };
+    </script>
+</body>
+</html>
